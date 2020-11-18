@@ -26,7 +26,7 @@ char* file_name;
 std::ofstream logger;
 void segfault_sigaction(int signal, siginfo_t *si, void *arg);
 void writeToLog(std::ofstream &logFile, int64_t relativeTime, double rate, double rtt,
-                     int window, int64_t sent, int loss);
+                     int window, int64_t sent, int loss, int ack, int nack);
 
 int main(int argc, char* argv[])
 {
@@ -177,7 +177,8 @@ DWORD WINAPI monitor(LPVOID s)
          break;
       }
       writeToLog(logger, perf.msTimeStamp, perf.mbpsSendRate, perf.msRTT,
-                           perf.pktFlightSize, perf.pktSentTotal, perf.pktSndLossTotal);
+                           perf.pktFlightSize, perf.pktSentTotal, perf.pktSndLossTotal,
+                           perf.pktRecvACKTotal, perf.pktRecvNAKTotal);
 
    }
 
@@ -190,13 +191,15 @@ DWORD WINAPI monitor(LPVOID s)
 
 
 void writeToLog(std::ofstream &logFile, int64_t relativeTime, double rate, double rtt,
-                     int window, int64_t sent, int loss)
+                     int window, int64_t sent, int loss, int ack, int nack)
 {
    logFile << relativeTime << "," << rate;
    logFile << "," << rtt;
    logFile << "," << window;
    logFile << "," << sent;
    logFile << "," << loss;
+   logFile << "," << ack;
+   logFile << "," << nack;
    logFile << "\n";
 
    return;
